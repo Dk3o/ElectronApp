@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # maxagvdesktop
 
 This template should help get you started developing with Vue 3 in Vite.
@@ -28,6 +27,3 @@ npm run dev
 ```sh
 npm run build
 ```
-=======
-# ElectronApp
->>>>>>> 730ddfd194bd576bbbf51a4c4c4839d462117573
