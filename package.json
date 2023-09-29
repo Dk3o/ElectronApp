@@ -1,0 +1,23 @@
+{
+  "name": "maxagvdesktop",
+  "version": "0.0.0",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "electron:start": "electron ."
+  },
+  "dependencies": {
+    "ant-design-vue": "^4.0.3",
+    "electron-reload": "^2.0.0-alpha.1",
+    "pinia": "^2.1.6",
+    "vue": "^3.3.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.3.4",
+    "electron": "^26.2.4",
+    "vite": "^4.4.9"
+  }
+}
