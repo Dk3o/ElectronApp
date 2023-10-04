@@ -1,5 +1,13 @@
 @import './base.css';
 
+.ant-popover .ant-popover-inner {
+  background-color: #4f4d48 !important;
+}
+
+.ant-popover .ant-popover-arrow::after {
+  background-color: #4f4d48 !important;
+}
+
 /* #app {
   max-width: 1280px;
   margin: 0 auto;

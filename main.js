@@ -19,7 +19,7 @@ function createWindow() {
     },
   });
 
-  win.loadURL('http://localhost:5174'); // Assuming Vite is running on port 3000
+  win.loadURL('http://localhost:5173'); // Assuming Vite is running on port 3000
 }
 
 app.whenReady().then(() => {

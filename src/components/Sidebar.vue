@@ -9,15 +9,20 @@
     FileOutlined,
     } from '@ant-design/icons-vue';
     const collapsed = ref(false);
-const selectedKeys = ref(['1']);
+    const selectedKeys = ref(['1']);
 </script>
 <template>
     <a-layout-sider v-model:collapsed="collapsed" collapsible>
-      <div class="logo" />
+      <router-link to="/">
+        <div class="logo"></div>
+      </router-link>
+      
       <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline">
         <a-menu-item key="1">
-          <pie-chart-outlined />
-          <span>Option 1</span>
+          <router-link to="/maxsystem">
+            <pie-chart-outlined />
+            <span>Max System</span>
+          </router-link>
         </a-menu-item>
       </a-menu>
     </a-layout-sider>
