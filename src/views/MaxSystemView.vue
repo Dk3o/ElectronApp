@@ -1,10 +1,11 @@
 <script setup>
-    import { reactive, ref, h, watch, computed } from 'vue'
+    import { reactive, ref, h, watch, computed, watchEffect } from 'vue'
     import axios from 'axios';
     import { PlusOutlined, LoadingOutlined } from '@ant-design/icons-vue';
     import Tooltip  from '../components/Tooltip.vue';
     const placement = ref('left');
     const isLoading = ref(false)
+    const agvTypesInputs = ref([])
     const form = reactive({
         projectName: '',
         projectId: '',
@@ -12,6 +13,7 @@
         userInitial: '',
         numberOfAgvs: '',
         numberOfAgvTypes: '',
+        agvTypes: Array(agvTypesInputs.value.length).fill(0)
     });
     const drawerWidth = ref(280)
     const response = ref('');
@@ -53,6 +55,12 @@
                 message: 'Please enter number of AGV types',
             },
         ],
+        agvTypes: [
+            {
+                required: true,
+                message: 'Please enter number of AGVs',
+            },
+        ],
     };
     const open = ref(false);
     const showDrawer = () => {
@@ -66,6 +74,8 @@
         form.userInitial = ''
         form.numberOfAgvs = ''
         form.numberOfAgvTypes = ''
+
+        closeMultiLevel()
     };
 
     const tooltip = ref({
@@ -113,14 +123,12 @@
         spin: true,
     });
 
-    const childrenDrawer = ref(false);
-    // if(from.projectName && form.numberOfAgvTypes) {
-    //     childrenDrawer.value = true;
-    // }
-
     // Watch for changes in form.numberOfAgvTypes
     watch(() => form.numberOfAgvTypes, (newValue) => {
         multiLevelOpen.value = newValue >= 2;
+        if(form.numberOfAgvTypes == null) {
+            closeMultiLevel();
+        }
     });
 
     const multiLevelOpen = ref(false)
@@ -128,9 +136,11 @@
     const closeMultiLevel = () => {
         multiLevelOpen.value = false
         form.numberOfAgvTypes = ''
+        form.agvTypes = []
     }
 
     const agvTypes = computed(() => {
+        console.log(form.numberOfAgvTypes)
         const items = [];
         for (let i = 0; i < form.numberOfAgvTypes -1; i++) {
             items.push(i + 1);
@@ -199,6 +209,36 @@
                     </template>
                 </a-space>
             </a-form-item>
+            <template v-if="multiLevelOpen">
+                <div class="multi-level">
+                    <div class="multi-level-wrapper">
+                        <div class="multi-level-wrapper-body">
+                            <div class="multi-level-header">
+                                <div class="multi-level-header-title">
+                                    <button aria-label="Close" class="multi-level-close" @click="closeMultiLevel">
+                                        <span role="img" aria-label="close" class="anticon anticon-close">
+                                            <svg focusable="false" data-icon="close" width="1em" height="1em" fill="currentColor" aria-hidden="true" fill-rule="evenodd" viewBox="64 64 896 896"><path d="M799.86 166.31c.02 0 .04.02.08.06l57.69 57.7c.04.03.05.05.06.08a.12.12 0 010 .06c0 .03-.02.05-.06.09L569.93 512l287.7 287.7c.04.04.05.06.06.09a.12.12 0 010 .07c0 .02-.02.04-.06.08l-57.7 57.69c-.03.04-.05.05-.07.06a.12.12 0 01-.07 0c-.03 0-.05-.02-.09-.06L512 569.93l-287.7 287.7c-.04.04-.06.05-.09.06a.12.12 0 01-.07 0c-.02 0-.04-.02-.08-.06l-57.69-57.7c-.04-.03-.05-.05-.06-.07a.12.12 0 010-.07c0-.03.02-.05.06-.09L454.07 512l-287.7-287.7c-.04-.04-.05-.06-.06-.09a.12.12 0 010-.07c0-.02.02-.04.06-.08l57.7-57.69c.03-.04.05-.05.07-.06a.12.12 0 01.07 0c.03 0 .05.02.09.06L512 454.07l287.7-287.7c.04-.04.06-.05.09-.06a.12.12 0 01.07 0z"></path></svg>
+                                        </span>
+                                    </button>
+                                    <div class="multi-level-title">AGV types</div>
+                                </div>
+                            </div>
+                            <div class="multi-level-body" style="padding-bottom: 80px;">
+                                <a-form-item v-for="(i, index) in agvTypes"
+                                    :key="index"
+                                    :label="`AGVs of type ${i}`" 
+                                    name="agvTypes"
+                                >
+                                    <template class="form-item">
+                                        <a-input-number v-model:value="form.agvTypes[index]" :min="0"/>
+                                        <Tooltip v-if="index === 0" :tooltipText="tooltip.agvTypes"/>
+                                    </template>
+                                </a-form-item>
+                            </div>
+                        </div>
+                    </div>
+                </div>  
+            </template>
         </a-form>
 
         <template v-if="isLoading">
@@ -209,38 +249,7 @@
             <span>{{ response }}</span>
         </template>
             
-        <template v-if="multiLevelOpen">
-        <div class="multi-level">
-                <div class="multi-level-wrapper">
-                    <div class="multi-level-wrapper-body">
-                        <div class="multi-level-header">
-                            <div class="multi-level-header-title">
-                                <button aria-label="Close" class="multi-level-close" @click="closeMultiLevel">
-                                    <span role="img" aria-label="close" class="anticon anticon-close">
-                                        <svg focusable="false" data-icon="close" width="1em" height="1em" fill="currentColor" aria-hidden="true" fill-rule="evenodd" viewBox="64 64 896 896"><path d="M799.86 166.31c.02 0 .04.02.08.06l57.69 57.7c.04.03.05.05.06.08a.12.12 0 010 .06c0 .03-.02.05-.06.09L569.93 512l287.7 287.7c.04.04.05.06.06.09a.12.12 0 010 .07c0 .02-.02.04-.06.08l-57.7 57.69c-.03.04-.05.05-.07.06a.12.12 0 01-.07 0c-.03 0-.05-.02-.09-.06L512 569.93l-287.7 287.7c-.04.04-.06.05-.09.06a.12.12 0 01-.07 0c-.02 0-.04-.02-.08-.06l-57.69-57.7c-.04-.03-.05-.05-.06-.07a.12.12 0 010-.07c0-.03.02-.05.06-.09L454.07 512l-287.7-287.7c-.04-.04-.05-.06-.06-.09a.12.12 0 010-.07c0-.02.02-.04.06-.08l57.7-57.69c.03-.04.05-.05.07-.06a.12.12 0 01.07 0c.03 0 .05.02.09.06L512 454.07l287.7-287.7c.04-.04.06-.05.09-.06a.12.12 0 01.07 0z"></path></svg>
-                                    </span>
-                                </button>
-                                <div class="multi-level-title">AGV types</div>
-                            </div>
-                        </div>
-                        <div class="multi-level-body" style="padding-bottom: 80px;">
-                            <a-form :model="form" :rules="rules" layout="vertical">
-                                <a-form-item v-for="(i, index) in agvTypes"
-                                    :key="index"
-                                    :label="`AGVs of type ${i}`" 
-                                    :name="`agvType${i}`"
-                                >
-                                    <template class="form-item">
-                                        <a-input-number v-model:value="form.agvTypes" :min="0"/>
-                                        <Tooltip v-if="index === 0" :tooltipText="tooltip.agvTypes"/>
-                                    </template>
-                                </a-form-item>
-                            </a-form>
-                        </div>
-                    </div>
-                </div>
-            </div>  
-        </template>
+
     </a-drawer>
 
 </template>
