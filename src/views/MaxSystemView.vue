@@ -13,8 +13,20 @@
         userInitial: '',
         numberOfAgvs: '',
         numberOfAgvTypes: '',
-        agvTypes: Array(agvTypesInputs.value.length).fill(0)
+        agvTypes: Array(agvTypesInputs.value.length).fill(null)
+        
     });
+    const handleInput = (test) => {
+        // If the value is empty, set it to null, otherwise, set the value
+        // const test = form.agvTypes[index] === '' ? null : form.agvTypes[index];
+        console.log(test)
+    };
+    // const computedAgvTypes = computed(() => {
+    // return form.agvTypes.map(value => {
+    //     // If the value is empty, return null, otherwise, return the value
+    //     return value === '' ? null : value;
+    // });
+    // });
     const drawerWidth = ref(280)
     const response = ref('');
 
@@ -57,8 +69,8 @@
         ],
         agvTypes: [
             {
-                required: true,
-                message: 'Please enter number of AGVs',
+            required: true,
+            message: 'Please enter number of AGVs',
             },
         ],
     };
@@ -85,19 +97,44 @@
 
     const createProject = async () => {
         response.value = ''
+
+        const sum = [...form.agvTypes].reduce((accumulator, currentValue) => accumulator + currentValue, 0);
+        const lastAgvType = form.numberOfAgvs - sum;
+        if (form.numberOfAgvs > sum) {
+            form.agvTypes = [...form.agvTypes, lastAgvType];
+        }
+        // console.log(form.agvTypes);
+        // form.agvTypes.forEach((value) => {
+        //     agvTypesInputs.value.push({ value }); // Push values to agvTypesInputs array
+        // });
+        console.log([...form.agvTypes])
+        console.log(form.agvTypes)
+        if(sum > form.numberOfAgvs)
+        {
+            console.log("not enough AGVs")
+        }
+
+        // TODO
+        // if(sum < form.numberOfAgvTypes) {
+        //     console.log(`Agvs left: ${sum - form.numberOfAgvTypes}`);
+        // }
         if (
             !form.projectName ||
             !form.projectId ||
             !form.vmChannel ||
+            !form.userInitial ||
             !form.numberOfAgvs ||
             !form.numberOfAgvTypes ||
-            !form.userInitial
+            form.agvTypes.some(value => value === null || value === undefined || value === '') ||
+            form.agvTypes.length !== form.numberOfAgvTypes ||
+            sum > form.numberOfAgvs
             ) {
             return; // Exit the function without making the API request
         }
 
         try {
             isLoading.value = true
+
             const apiResponse = await axios.post('http://localhost:5000/api/create-project', {
                 projectName: form.projectName,
                 projectId: form.projectId,
@@ -140,10 +177,9 @@
     }
 
     const agvTypes = computed(() => {
-        console.log(form.numberOfAgvTypes)
         const items = [];
         for (let i = 0; i < form.numberOfAgvTypes -1; i++) {
-            items.push(i + 1);
+            items.push(i);
         }
         return items;
     });
@@ -224,13 +260,13 @@
                                 </div>
                             </div>
                             <div class="multi-level-body" style="padding-bottom: 80px;">
-                                <a-form-item v-for="(i, index) in agvTypes"
+                                <a-form-item v-for="(item, index) in agvTypes"
                                     :key="index"
-                                    :label="`AGVs of type ${i}`" 
+                                    :label="`AGVs of type ${index + 1}`"
                                     name="agvTypes"
                                 >
                                     <template class="form-item">
-                                        <a-input-number v-model:value="form.agvTypes[index]" :min="0"/>
+                                        <a-input-number v-model:value="form.agvTypes[index]" :min="0" :id="index.toString()"/>
                                         <Tooltip v-if="index === 0" :tooltipText="tooltip.agvTypes"/>
                                     </template>
                                 </a-form-item>
