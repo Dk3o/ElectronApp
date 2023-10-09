@@ -13,6 +13,7 @@
   "dependencies": {
     "ant-design-vue": "^4.0.3",
     "axios": "^1.5.1",
+    "electron-drag": "^2.0.0",
     "electron-reload": "^2.0.0-alpha.1",
     "pinia": "^2.1.6",
     "vue": "^3.3.4",
