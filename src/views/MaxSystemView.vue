@@ -3,6 +3,7 @@
     import axios from 'axios';
     import { PlusOutlined, LoadingOutlined } from '@ant-design/icons-vue';
     import Tooltip  from '../components/Tooltip.vue';
+
     const placement = ref('left');
     const isLoading = ref(false)
     const agvTypesInputs = ref([])
@@ -13,20 +14,10 @@
         userInitial: '',
         numberOfAgvs: '',
         numberOfAgvTypes: '',
-        agvTypes: Array(agvTypesInputs.value.length).fill(null)
-        
+        agvTypes: Array(agvTypesInputs.value.length).fill(null),
+        zipProject: false
     });
-    const handleInput = (test) => {
-        // If the value is empty, set it to null, otherwise, set the value
-        // const test = form.agvTypes[index] === '' ? null : form.agvTypes[index];
-        console.log(test)
-    };
-    // const computedAgvTypes = computed(() => {
-    // return form.agvTypes.map(value => {
-    //     // If the value is empty, return null, otherwise, return the value
-    //     return value === '' ? null : value;
-    // });
-    // });
+ 
     const drawerWidth = ref(280)
     const response = ref('');
 
@@ -97,27 +88,21 @@
 
     const createProject = async () => {
         response.value = ''
-
         const sum = [...form.agvTypes].reduce((accumulator, currentValue) => accumulator + currentValue, 0);
         const lastAgvType = form.numberOfAgvs - sum;
         if (form.numberOfAgvs > sum) {
             form.agvTypes = [...form.agvTypes, lastAgvType];
         }
-        // console.log(form.agvTypes);
-        // form.agvTypes.forEach((value) => {
-        //     agvTypesInputs.value.push({ value }); // Push values to agvTypesInputs array
-        // });
-        console.log([...form.agvTypes])
-        console.log(form.agvTypes)
+
+        if (form.numberOfAgvs === form.numberOfAgvTypes) {
+            form.agvTypes = Array.from({ length: form.numberOfAgvTypes }, (_, index) => index + 1);
+        }
+
         if(sum > form.numberOfAgvs)
         {
             console.log("not enough AGVs")
         }
 
-        // TODO
-        // if(sum < form.numberOfAgvTypes) {
-        //     console.log(`Agvs left: ${sum - form.numberOfAgvTypes}`);
-        // }
         if (
             !form.projectName ||
             !form.projectId ||
@@ -129,6 +114,7 @@
             form.agvTypes.length !== form.numberOfAgvTypes ||
             sum > form.numberOfAgvs
             ) {
+            form.agvTypes = []
             return; // Exit the function without making the API request
         }
 
@@ -141,7 +127,9 @@
                 vmChannel: form.vmChannel,
                 userInitial: form.userInitial,
                 numberOfAgvs: form.numberOfAgvs,
-                userInitial: form.userInitial,
+                agvTypes: form.agvTypes,
+                numberOfAgvTypes: form.numberOfAgvTypes,
+                zipProject: form.zipProject,
             });
             response.value = apiResponse.data.message;
         } catch (error) {
@@ -150,6 +138,7 @@
         }
         finally {
             isLoading.value = false
+            form.agvTypes = []
         }
     };
 
@@ -162,11 +151,33 @@
 
     // Watch for changes in form.numberOfAgvTypes
     watch(() => form.numberOfAgvTypes, (newValue) => {
-        multiLevelOpen.value = newValue >= 2;
-        if(form.numberOfAgvTypes == null) {
-            closeMultiLevel();
+
+        if (newValue >= 2 && newValue < form.numberOfAgvs) {
+            multiLevelOpen.value = true;
+        } else {
+            multiLevelOpen.value = false;
+            form.agvTypes = [];
         }
+        // multiLevelOpen.value = newValue >= 2;
+        // // if(form.numberOfAgvTypes == null || form.numberOfAgvTypes === form.numberOfAgvs) {
+        // //     multiLevelOpen.value = false
+        // //     form.agvTypes = []
+        // // }
     });
+    watch(() => form.numberOfAgvs, (newValue) => {
+
+        if (newValue > form.numberOfAgvTypes && form.numberOfAgvTypes >= 2 ) {
+            multiLevelOpen.value = true;
+        } else {
+            multiLevelOpen.value = false;
+            form.agvTypes = [];
+        }
+        // multiLevelOpen.value = newValue >= 2;
+        // // if(form.numberOfAgvTypes == null || form.numberOfAgvTypes === form.numberOfAgvs) {
+        // //     multiLevelOpen.value = false
+        // //     form.agvTypes = []
+        // // }
+        });
 
     const multiLevelOpen = ref(false)
 
@@ -233,6 +244,9 @@
                     </template>
                 </a-form-item>
             <a-divider />
+                <span style="display: flex; padding-bottom: 8px">Zip project</span>
+                <a-switch v-model:checked="form.zipProject" />
+            <a-divider />
             <a-form-item>
                 <a-space>
                     <!-- <a-input-number id="inputNumber" v-model:value="value" :min="1" :max="10" /> -->
@@ -275,17 +289,20 @@
                     </div>
                 </div>  
             </template>
+                
         </a-form>
 
         <template v-if="isLoading">
-            <a-spin :indicator="indicator" />
+            <div class="in-process">
+                <a-spin :indicator="indicator" style="margin: 10px 0"/>
+                <span>In progress</span>
+                <span>Please wait it can take a while...</span>
+            </div>
         </template>
 
         <template v-if="response">
             <span>{{ response }}</span>
         </template>
-            
-
     </a-drawer>
 
 </template>
@@ -374,5 +391,11 @@
         min-height: 0;
         padding: 24px;
         overflow: auto;
+    }
+
+    .in-process {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 </style>
