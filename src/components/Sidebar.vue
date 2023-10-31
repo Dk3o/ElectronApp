@@ -30,7 +30,7 @@
         </div>
       </router-link>
       
-      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="inline">
+      <a-menu v-model:selectedKeys="selectedKeys" theme="dark" mode="vertical">
         <a-menu-item key="1">
           <router-link to="/maxsystem">
             <pie-chart-outlined />

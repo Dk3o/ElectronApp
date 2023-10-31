@@ -1,7 +1,8 @@
 <script setup>
-    import { reactive, ref, h, watch, computed, watchEffect } from 'vue'
+    import { reactive, ref, h, watch, computed, watchEffect, onMounted } from 'vue'
     import axios from 'axios';
     import { PlusOutlined, LoadingOutlined } from '@ant-design/icons-vue';
+
     import Tooltip  from '../components/Tooltip.vue';
 
     const placement = ref('left');
@@ -20,6 +21,7 @@
  
     const drawerWidth = ref(280)
     const response = ref('');
+    const projects = ref([]);
 
     const rules = {
         projectName: [
@@ -86,6 +88,19 @@
         vmChannel: "HYPER03-VM(XX)\ne.g (HYPER03-VM12)",
     })
 
+    onMounted(async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/get-projects');
+            projects.value = response.data.projects;
+            console.log(response)
+            console.log(response.data)
+            console.log(response.data.projects)
+            console.log(projects.value)
+        } catch (error) {
+            console.error('Error fetching projects:', error);
+        }
+    });
+
     const createProject = async () => {
         response.value = ''
         const sum = [...form.agvTypes].reduce((accumulator, currentValue) => accumulator + currentValue, 0);
@@ -132,6 +147,8 @@
                 zipProject: form.zipProject,
             });
             response.value = apiResponse.data.message;
+            const newProject = { name: form.projectName };
+            projects.value.push(newProject);
         } catch (error) {
             console.error('Error creating project:', error);
             response.value = 'Error creating project.';
@@ -141,6 +158,22 @@
             form.agvTypes = []
         }
     };
+
+    const deleteProject = async (record) => {
+        console.log(record)
+        try {
+            const apiResponse = await axios.post('http://localhost:5000/api/delete-project', {
+                name: record.name,
+            });
+            response.value = apiResponse.data.message;
+        } catch (error) {
+            console.error('Error deleting project:', error);
+            response.value = 'Error deleting project.';
+        }
+        finally {
+            return
+        }
+    }
 
     const indicator = h(LoadingOutlined, {
         style: {
@@ -194,9 +227,48 @@
         }
         return items;
     });
+
+//     const data = [
+//   {
+//     key: '1',
+//     name: 'John Brown',
+//     age: 32,
+//     address: 'New York No. 1 Lake Park',
+//     tags: ['nice', 'developer'],
+//   },
+//   {
+//     key: '2',
+//     name: 'Jim Green',
+//     age: 42,
+//     address: 'London No. 1 Lake Park',
+//     tags: ['loser'],
+//   },
+//   {
+//     key: '3',
+//     name: 'Joe Black',
+//     age: 32,
+//     address: 'Sidney No. 1 Lake Park',
+//     tags: ['cool', 'teacher'],
+//   },
+// ];
+const columns = ref([
+  {
+    title: 'Project',
+    dataIndex: 'Project',
+    key: 'project',
+    resizable: false,
+
+  },
+  {
+    key: 'action',
+    width: 150,
+  },
+]);
+
 </script>
 
 <template>
+    <h1>Project setup</h1>
     <a-space wrap>
         <a-button type="link" @click="showDrawer">Create project <template #icon><PlusOutlined /></template></a-button>
     </a-space>
@@ -304,7 +376,26 @@
             <span>{{ response }}</span>
         </template>
     </a-drawer>
-
+    <a-table :columns="columns" :data-source="projects">
+        <template #bodyCell="{ column, record }">
+            <template v-if="column.key === 'project'">
+                <a>
+                {{ record.name }}
+                </a>
+            </template>
+            
+            <template v-if="column.key === 'action'">
+                <a-divider type="vertical" />
+                <span>
+                <a @click="deleteProject(record)">Delete</a>
+                <!-- <a class="ant-dropdown-link">
+                    More actions
+                    <down-outlined />
+                </a> -->
+                </span>
+            </template>
+        </template>
+    </a-table>
 </template>
 
 <style scoped>
@@ -398,4 +489,6 @@
         flex-direction: column;
         align-items: center;
     }
+
+
 </style>

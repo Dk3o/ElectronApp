@@ -2,7 +2,7 @@
 <script setup>
     import { h, ref } from 'vue';
     import { MailOutlined, AppstoreOutlined, SettingOutlined } from '@ant-design/icons-vue';
-    const current = ref(['mail']);
+    const current = ref([]);
     const items = ref([
         {
             key: 'mail',
@@ -56,5 +56,5 @@
 </script>
 
 <template>
-    <a-menu v-model:selectedKeys="current" theme="dark" mode="horizontal" :items="items" />
+    <a-menu v-model:selectedKeys="current" theme="dark" mode="horizontal" :items="items" style="border-bottom: 1px solid #fff;"/>
 </template>
