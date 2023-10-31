@@ -1,5 +1,9 @@
 @import './base.css';
 
+li, .ant-btn {
+  border-radius: 0 !important;
+}
+
 .ant-popover .ant-popover-inner {
   background-color: #4f4d48 !important;
 }
@@ -8,6 +12,17 @@
   background-color: #4f4d48 !important;
 }
 
+.ant-table-content {
+  max-height: calc(100vh - 209px) !important;
+  overflow-y: auto;
+  margin: 40px 0;
+}
+
+.ant-table-thead {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
 /* #app {
   max-width: 1280px;
   margin: 0 auto;
